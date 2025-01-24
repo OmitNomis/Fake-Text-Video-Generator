@@ -1,0 +1,8 @@
+flask==2.0.1
+flask-cors==3.0.10
+moviepy==1.0.3
+pillow==9.0.0
+gtts==2.2.3
+numpy==1.21.0
+selenium==4.15.2
+webdriver-manager==4.0.1 
