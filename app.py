@@ -301,7 +301,10 @@ def generate_video(messages, header_data):
         # Get the selected background video
         selected_bg = header_data.get('backgroundVideo', 'background')
         print(f"Using background video: {selected_bg}")  # Debug log
-        bg_path = os.path.join(os.path.dirname(__file__), 'static', 'videos', f'{selected_bg}.mp4')
+        
+        # Map the selected value to the actual filename
+        bg_filename = f"{selected_bg}.mp4"
+        bg_path = os.path.join(os.path.dirname(__file__), 'static', 'videos', bg_filename)
         print(f"Background video path: {bg_path}")  # Debug log
         
         background = VideoFileClip(bg_path, audio=False)
