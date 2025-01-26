@@ -298,12 +298,12 @@ def generate_video(messages, header_data):
         
         print(f"Using voice IDs - Sender: {sender_voice_id}, Receiver: {receiver_voice_id}")
         
-        # Get the selected background video
-        selected_bg = header_data.get('backgroundVideo', 'background')
+        # Get the selected background video - default to "background 3"
+        selected_bg = header_data.get('backgroundVideo', 'background 3')
         print(f"Using background video: {selected_bg}")  # Debug log
         
         # Map the selected value to the actual filename
-        bg_filename = f"{selected_bg}.mp4"
+        bg_filename = "background 3.mp4"  # Always use background 3.mp4
         bg_path = os.path.join(os.path.dirname(__file__), 'static', 'videos', bg_filename)
         print(f"Background video path: {bg_path}")  # Debug log
         
@@ -438,7 +438,7 @@ def generate_endpoint():
             'profileImage': data.get('profileImage', ''),
             'headerName': data.get('headerName', 'John Doe'),
             'voiceSettings': voice_settings,  # Pass the validated voice settings
-            'backgroundVideo': data.get('backgroundVideo', 'background')
+            'backgroundVideo': data.get('backgroundVideo', 'background 3')
         }
         
         video_path = generate_video(messages, header_data)
