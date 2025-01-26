@@ -13,7 +13,6 @@ from selenium.common.exceptions import TimeoutException
 import tempfile
 import time
 import os
-import base64
 from PIL import Image, ImageFilter, ImageDraw
 import io
 import numpy as np
