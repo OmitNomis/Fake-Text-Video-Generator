@@ -107,19 +107,9 @@
                     <h3>Select Background Video</h3>
                     <div class="video-previews">
                         <div class="video-option">
-                            <video src="{{ url_for('static', filename='videos/background.mp4') }}" loop muted class="preview-video"></video>
-                            <input type="radio" name="background" value="background" checked>
-                            <label>Style 1</label>
-                        </div>
-                        <div class="video-option">
-                            <video src="{{ url_for('static', filename='videos/background 2.mp4') }}" loop muted class="preview-video"></video>
-                            <input type="radio" name="background" value="background 2">
-                            <label>Style 2</label>
-                        </div>
-                        <div class="video-option">
                             <video src="{{ url_for('static', filename='videos/background 3.mp4') }}" loop muted class="preview-video"></video>
-                            <input type="radio" name="background" value="background 3">
-                            <label>Style 3</label>
+                            <input type="radio" name="background" value="background 3" checked>
+                            <label>Default Style</label>
                         </div>
                     </div>
                 </div>
