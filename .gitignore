@@ -4,3 +4,4 @@ __pycache__/
 venv/
 .DS_Store
 static/videos/*.mp4
+static/videos/*.mp4
