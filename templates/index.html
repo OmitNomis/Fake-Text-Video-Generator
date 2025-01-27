@@ -11,7 +11,7 @@
     <meta http-equiv="Expires" content="0">
 </head>
 <body>
-    <div id="imageModal" class="modal picture-modal">
+    <div id="profileImageModal" class="modal picture-modal">
         <div class="modal-content picture-modal-content">
             <span class="close picture-modal-close">&times;</span>
             <h2>Choose Profile Picture</h2>
@@ -179,9 +179,9 @@
     </div>
 
     <!-- Add modal for JSON import -->
-    <div id="importModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
+    <div id="importJsonModal" class="modal json-import-modal">
+        <div class="modal-content json-import-modal-content">
+            <span class="close json-import-modal-close">&times;</span>
             <h2>Import Conversation</h2>
             <div class="sample-json">
                 Sample Format:
@@ -580,9 +580,8 @@
         const profileImageContainer = document.getElementById('profileImageContainer');
         const profileUpload = document.getElementById('profileUpload');
         const profileImage = document.getElementById('profileImage');
-        const headerName = document.getElementById('headerName');
-        const modal = document.getElementById('imageModal');
-        const closeBtn = document.querySelector('.close');
+        const profileImageModal = document.getElementById('profileImageModal');
+        const profileImageCloseBtn = profileImageModal.querySelector('.picture-modal-close');
         const uploadBtn = document.getElementById('uploadBtn');
         const existingImages = document.getElementById('existingImages');
         const uploadPreview = document.getElementById('uploadPreview');
@@ -619,7 +618,7 @@
 
         // Open modal and load images
         profileImageContainer.addEventListener('click', () => {
-            modal.style.display = "block";
+            profileImageModal.style.display = "block";
             loadExistingImages();
             // Reset upload preview
             uploadPreview.style.display = 'none';
@@ -627,14 +626,13 @@
             profileUpload.value = '';
         });
 
-        // Close modal
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = "none";
+        profileImageCloseBtn.addEventListener('click', () => {
+            profileImageModal.style.display = "none";
         });
 
         window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = "none";
+            if (e.target === profileImageModal) {
+                profileImageModal.style.display = "none";
             }
         });
 
@@ -666,7 +664,7 @@
                 img.classList.toggle('selected', img.src === src);
             });
             
-            modal.style.display = "none";
+            profileImageModal.style.display = "none";
         }
 
         // Handle new image upload
@@ -821,22 +819,22 @@
         });
 
         const importBtn = document.getElementById('importBtn');
-        const importModal = document.getElementById('importModal');
-        const closeBtn = document.querySelector('.close');
+        const importJsonModal = document.getElementById('importJsonModal');
+        const importJsonCloseBtn = importJsonModal.querySelector('.json-import-modal-close');
         const confirmImport = document.getElementById('confirmImport');
         const jsonInput = document.getElementById('jsonInput');
 
         importBtn.onclick = () => {
-            importModal.style.display = "block";
+            importJsonModal.style.display = "block";
         }
 
-        closeBtn.onclick = () => {
-            importModal.style.display = "none";
+        importJsonCloseBtn.onclick = () => {
+            importJsonModal.style.display = "none";
         }
 
         window.onclick = (event) => {
-            if (event.target == importModal) {
-                importModal.style.display = "none";
+            if (event.target == importJsonModal) {
+                importJsonModal.style.display = "none";
             }
         }
 
@@ -850,7 +848,7 @@
             try {
                 JSON.parse(jsonData); // Validate JSON
                 importFromJSON(jsonData);
-                importModal.style.display = "none";
+                importJsonModal.style.display = "none";
                 jsonInput.value = '';
             } catch (error) {
                 alert('Invalid JSON format');
