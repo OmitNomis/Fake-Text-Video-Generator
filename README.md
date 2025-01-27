@@ -2,7 +2,10 @@
 
 ## Sample Video
 
-<video src='[https://raw.github.com/OmitNomis/Light-Version---Fake-Text-Story-Generator.git](https://github.com/OmitNomis/Light-Version---Fake-Text-Story-Generator/blob/main/sample-video/output_video%20.mp4)' width=180/>
+**Sample video quality severely reduced so that it can be tagged here, the generated videos are high quality**
+
+https://github.com/user-attachments/assets/79d9f71f-ff15-405b-a981-449a0d1269bc
+
 
 
 Welcome to the Fake Text Story Video Generator! This application allows you to create engaging text message videos with realistic conversations.
