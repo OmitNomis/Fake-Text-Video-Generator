@@ -713,18 +713,41 @@
         const existingImages = document.getElementById('existingImages');
         const uploadPreview = document.getElementById('uploadPreview');
 
-        // Clear any existing storage and set defaults on page load
+        // Remove the existing window.addEventListener('load') that clears localStorage
+        // and replace with this new initialization code
         window.addEventListener('load', () => {
-            localStorage.clear();  // Clear all stored values
-            // Set default profile picture
-            profileImage.src = "/static/images/profile_pictures/profile.jpg";
-            headerName.textContent = 'John Doe';
-            // Set initial defaults in storage
-            localStorage.setItem('profileImage', profileImage.src);
-            localStorage.setItem('headerName', 'John Doe');
-            // Load existing images initially
+            // Load saved settings or set defaults
+            const savedHeaderName = localStorage.getItem('headerName') || 'John Doe';
+            const savedProfileImage = localStorage.getItem('profileImage') || '/static/images/profile_pictures/profile.jpg';
+            
+            // Set initial values
+            document.getElementById('headerName').textContent = savedHeaderName;
+            document.getElementById('profileImage').src = savedProfileImage;
+            
+            // Initialize other components
             loadExistingImages();
+            loadBackgroundVideos();
+            
+            // Load API key and voices if available
+            const apiKey = localStorage.getItem('elevenLabsKey');
+            if (apiKey) {
+                document.getElementById('elevenLabsKey').value = apiKey;
+                fetchVoiceIds();
+            }
         });
+
+        // Update the saveSettings function
+        function saveSettings() {
+            const currentName = document.getElementById('headerName').textContent.trim() || 'John Doe';
+            const currentImage = document.getElementById('profileImage').src;
+            const senderVoice = document.getElementById('senderVoice').value;
+            const receiverVoice = document.getElementById('receiverVoice').value;
+            
+            localStorage.setItem('headerName', currentName);
+            localStorage.setItem('profileImage', currentImage);
+            localStorage.setItem('senderVoice', senderVoice);
+            localStorage.setItem('receiverVoice', receiverVoice);
+        }
 
         // Handle profile image upload preview
         profileUpload.addEventListener('change', (e) => {
@@ -784,7 +807,8 @@
         // Select existing image
         function selectProfileImage(src) {
             profileImage.src = src;
-            localStorage.setItem('profileImage', src);
+            localStorage.setItem('profileImage', src);  // Immediately save the profile image
+            saveSettings();
             
             // Update selected state in grid
             document.querySelectorAll('.image-grid img').forEach(img => {
@@ -815,7 +839,8 @@
 
                 const data = await response.json();
                 profileImage.src = data.image_path;
-                localStorage.setItem('profileImage', data.image_path);
+                localStorage.setItem('profileImage', data.image_path);  // Save immediately
+                saveSettings();  // Save all settings
                 
                 // Reset upload preview
                 uploadPreview.style.display = 'none';
@@ -835,7 +860,7 @@
             if (!headerName.textContent.trim()) {
                 headerName.textContent = 'John Doe';
             }
-            localStorage.setItem('headerName', headerName.textContent);  // Save current change
+            saveSettings();
         });
 
         headerName.addEventListener('keypress', (e) => {
@@ -920,23 +945,30 @@
                 senderVoice.innerHTML = '<option value="">Select a voice</option>';
                 receiverVoice.innerHTML = '<option value="">Select a voice</option>';
                 
-                // Add all voices to both dropdowns
+                // Get saved voice selections
+                const savedSenderVoice = localStorage.getItem('senderVoice');
+                const savedReceiverVoice = localStorage.getItem('receiverVoice');
+
+                // Populate voice options
                 voices.forEach(voice => {
                     // Add to sender dropdown
                     const senderOption = document.createElement('option');
-                    senderOption.value = voice.voice_id;  // Use voice_id directly
+                    senderOption.value = voice.voice_id;
                     senderOption.textContent = voice.name;
+                    senderOption.selected = (voice.voice_id === savedSenderVoice);
                     senderVoice.appendChild(senderOption);
                     
                     // Add to receiver dropdown
                     const receiverOption = document.createElement('option');
-                    receiverOption.value = voice.voice_id;  // Use voice_id directly
+                    receiverOption.value = voice.voice_id;
                     receiverOption.textContent = voice.name;
+                    receiverOption.selected = (voice.voice_id === savedReceiverVoice);
                     receiverVoice.appendChild(receiverOption);
                 });
 
-                // Save to localStorage
+                // Save API key and trigger settings save
                 localStorage.setItem('elevenLabsKey', apiKey);
+                saveSettings();
                 
                 alert('Voice IDs successfully fetched!');
             } catch (error) {
@@ -945,18 +977,9 @@
             }
         }
 
-        // Load saved data on page load
-        window.addEventListener('load', () => {
-            const savedKey = localStorage.getItem('elevenLabsKey');
-            const savedVoiceMap = localStorage.getItem('voiceMap');
-            
-            if (savedKey) {
-                document.getElementById('elevenLabsKey').value = savedKey;
-            }
-            if (savedVoiceMap) {
-                voiceMap = JSON.parse(savedVoiceMap);
-            }
-        });
+        // Add voice selection event listeners
+        document.getElementById('senderVoice').addEventListener('change', saveSettings);
+        document.getElementById('receiverVoice').addEventListener('change', saveSettings);
 
         const importBtn = document.getElementById('importBtn');
         const importJsonModal = document.getElementById('importJsonModal');
