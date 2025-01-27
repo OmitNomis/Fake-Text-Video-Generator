@@ -15,7 +15,13 @@
         <div class="loading-content">
             <div class="loader"></div>
             <h2>Generating Your Video</h2>
-            <div id="generationLog" class="generation-log"></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+            <div id="generationLog" class="generation-log">
+                <div class="log-content"></div>
+            </div>
         </div>
     </div>
     <div id="profileImageModal" class="modal picture-modal">
@@ -217,7 +223,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -227,29 +233,82 @@
         .loading-content {
             text-align: center;
             color: white;
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .loader {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
+            width: 60px;
+            height: 60px;
+            border: 5px solid #1a1a1a;
             border-radius: 50%;
             border-top: 5px solid #3498db;
+            margin: 0 auto;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
         }
 
         .generation-log {
-            max-width: 400px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin: 20px auto;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 5px;
-            text-align: left;
-            font-family: monospace;
+            flex-grow: 1;
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .log-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 100%;
+            overflow-y: auto;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .log-entry.info { color: #3498db; }
+        .log-entry.success { color: #2ecc71; }
+        .log-entry.warning { color: #f1c40f; }
+        .log-entry.error { color: #e74c3c; }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -365,21 +424,16 @@
             generateBtn.textContent = 'Generating...';
             
             const loadingOverlay = document.getElementById('loadingOverlay');
-            const generationLog = document.getElementById('generationLog');
             loadingOverlay.style.display = 'flex';
+            updateProgress(0);
             
-            function addLog(message) {
-                const logEntry = document.createElement('div');
-                logEntry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
-                generationLog.appendChild(logEntry);
-                generationLog.scrollTop = generationLog.scrollHeight;
-            }
-
             try {
                 updateMessagesArray();
+                addLog('Starting video generation...', 'info');
+                updateProgress(5);
                 
-                addLog('Starting video generation...');
-                addLog('Processing messages...');
+                addLog('Processing messages and preparing audio generation...', 'info');
+                updateProgress(10);
                 
                 const requestData = {
                     messages: messages,
@@ -394,7 +448,16 @@
                     backgroundVideo: document.querySelector('input[name="background"]:checked').value
                 };
                 
-                addLog('Generating audio clips...');
+                let messageCount = messages.length;
+                let progressPerMessage = 70 / messageCount; // Reserve 70% for message processing
+                
+                messages.forEach((msg, index) => {
+                    addLog(`Generating audio for message ${index + 1}/${messageCount}: "${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}"`, 'info');
+                    updateProgress(10 + (progressPerMessage * (index + 1)));
+                });
+                
+                addLog('Starting video rendering...', 'info');
+                updateProgress(80);
                 
                 const response = await fetch('/api/generate', {
                     method: 'POST',
@@ -410,7 +473,8 @@
                 }
                 
                 const data = await response.json();
-                addLog('Video generated successfully!');
+                updateProgress(100);
+                addLog('Video generated successfully!', 'success');
                 
                 // Create download link
                 const a = document.createElement('a');
@@ -422,7 +486,7 @@
                 
             } catch (error) {
                 console.error('Error:', error);
-                addLog(`Error: ${error.message}`);
+                addLog(`Error: ${error.message}`, 'error');
                 alert('Failed to generate video: ' + error.message);
             } finally {
                 setTimeout(() => {
@@ -976,6 +1040,22 @@
             // ...existing load event code...
             loadBackgroundVideos();
         });
+
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `${Math.round(percent)}%`;
+        }
+
+        function addLog(message, type = 'info') {
+            const logContent = document.querySelector('.log-content');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContent.appendChild(entry);
+            entry.scrollIntoView({ behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>
