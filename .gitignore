@@ -11,3 +11,8 @@ static/images/profile_pictures/*
 !static/images/profile_pictures/profile.jpg
 !static/images/profile_pictures/blank_profile.webp
 
+# Ignore everything in videos
+static/videos/*
+
+# Leave a sample file
+!static/videos/background 3.mp4

@@ -1,3 +1,9 @@
+import logging
+import sys
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
 from moviepy import VideoFileClip, ImageClip, CompositeVideoClip, concatenate_videoclips, CompositeAudioClip
@@ -21,6 +27,9 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)
+
+# Add this line to enable Flask debug mode
+app.config['DEBUG'] = True
 
 # Global list to track temporary files for cleanup
 temp_files = []
@@ -304,14 +313,16 @@ def generate_video(messages, header_data):
         
         print(f"Using voice IDs - Sender: {sender_voice_id}, Receiver: {receiver_voice_id}")
         
-        # Get the selected background video - default to "background 3"
-        selected_bg = header_data.get('backgroundVideo', 'background 3')
+        # Get the selected background video
+        selected_bg = header_data.get('backgroundVideo', 'background 3.mp4')
         print(f"Using background video: {selected_bg}")  # Debug log
         
-        # Map the selected value to the actual filename
-        bg_filename = "background 3.mp4"  # Always use background 3.mp4
-        bg_path = os.path.join(os.path.dirname(__file__), 'static', 'videos', bg_filename)
+        # Use the selected background video
+        bg_path = os.path.join(os.path.dirname(__file__), 'static', 'videos', selected_bg)
         print(f"Background video path: {bg_path}")  # Debug log
+        
+        if not os.path.exists(bg_path):
+            raise FileNotFoundError(f"Background video not found: {bg_path}")
         
         background = VideoFileClip(bg_path, audio=False)
         video_clips = []
@@ -444,7 +455,7 @@ def generate_endpoint():
             'profileImage': data.get('profileImage', ''),
             'headerName': data.get('headerName', 'John Doe'),
             'voiceSettings': voice_settings,  # Pass the validated voice settings
-            'backgroundVideo': data.get('backgroundVideo', 'background 3')
+            'backgroundVideo': data.get('backgroundVideo')  # Make sure this is passed from the frontend
         }
         
         video_path = generate_video(messages, header_data)
@@ -503,6 +514,17 @@ def get_profile_pictures():
              and f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp'))]
     return jsonify(files)
 
+@app.route('/api/background-videos')
+def get_background_videos():
+    video_dir = os.path.join('static', 'videos')
+    videos = [f for f in os.listdir(video_dir) if f.lower().endswith(('.mp4', '.mov'))]
+    return jsonify(videos)
+
 if __name__ == '__main__':
-    # Run Flask on all interfaces
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    try:
+        logging.info("Starting the Flask application...")
+        # Change the port to 5000 (Flask's default) in case 5001 is occupied
+        app.run(debug=True, host='0.0.0.0', port=5001)
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        sys.exit(1)

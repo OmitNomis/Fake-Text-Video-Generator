@@ -133,12 +133,8 @@
                 </div>
                 <div class="video-selection">
                     <h3>Select Background Video</h3>
-                    <div class="video-previews">
-                        <div class="video-option">
-                            <video src="{{ url_for('static', filename='videos/background 3.mp4') }}" loop muted class="preview-video"></video>
-                            <input type="radio" name="background" value="background 3" checked>
-                            <label>Default Style</label>
-                        </div>
+                    <div class="video-previews" id="videoPreviewsContainer">
+                        <!-- Videos will be dynamically added here -->
                     </div>
                 </div>
             </div>
@@ -865,6 +861,43 @@
             } catch (error) {
                 jsonInput.value = paste;
             }
+        });
+
+        // Add this function to load background videos
+        async function loadBackgroundVideos() {
+            try {
+                const response = await fetch('/api/background-videos');
+                const videos = await response.json();
+                
+                const container = document.getElementById('videoPreviewsContainer');
+                container.innerHTML = videos.map((video, index) => `
+                    <div class="video-option">
+                        <video src="/static/videos/${video}" loop muted class="preview-video"></video>
+                        <input type="radio" name="background" value="${video}" ${index === 0 ? 'checked' : ''}>
+                        <label>${video.replace(/\.[^/.]+$/, "")}</label>
+                    </div>
+                `).join('');
+
+                // Reattach event listeners for video previews
+                document.querySelectorAll('.preview-video').forEach(video => {
+                    video.addEventListener('mouseover', function() {
+                        this.play();
+                    });
+                    
+                    video.addEventListener('mouseout', function() {
+                        this.pause();
+                        this.currentTime = 0;
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading background videos:', error);
+            }
+        }
+
+        // Call this function when the page loads
+        window.addEventListener('load', () => {
+            // ...existing load event code...
+            loadBackgroundVideos();
         });
     </script>
 </body>
