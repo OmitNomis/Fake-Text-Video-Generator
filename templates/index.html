@@ -127,19 +127,13 @@
                         <div class="voice-selector">
                             <label for="senderVoice">Sender Voice:</label>
                             <select id="senderVoice">
-                                <option value="male">Male (Adam)</option>
-                                <option value="female">Female (Natalie)</option>
-                                <option value="brian">Male (Brian)</option>
-                                <option value="laura">Female (Laura)</option>
+                                <option value="">Select a voice</option>
                             </select>
                         </div>
                         <div class="voice-selector">
                             <label for="receiverVoice">Receiver Voice:</label>
                             <select id="receiverVoice">
-                                <option value="female">Female (Natalie)</option>
-                                <option value="male">Male (Adam)</option>
-                                <option value="brian">Male (Brian)</option>
-                                <option value="laura">Female (Laura)</option>
+                                <option value="">Select a voice</option>
                             </select>
                         </div>
                     </div>
@@ -441,9 +435,8 @@
                     headerName: localStorage.getItem('headerName') || 'John Doe',
                     voiceSettings: {
                         apiKey: document.getElementById('elevenLabsKey').value,
-                        voiceMap: voiceMap,
-                        sender: document.getElementById('senderVoice').value,
-                        receiver: document.getElementById('receiverVoice').value
+                        sender: document.getElementById('senderVoice').value,  // This will now be the voice ID
+                        receiver: document.getElementById('receiverVoice').value  // This will now be the voice ID
                     },
                     backgroundVideo: document.querySelector('input[name="background"]:checked').value
                 };
@@ -920,20 +913,30 @@
                 }
 
                 const voices = await response.json();
-                voiceMap = {};
                 
-                // Map voice names to IDs
+                // Clear existing options
+                const senderVoice = document.getElementById('senderVoice');
+                const receiverVoice = document.getElementById('receiverVoice');
+                senderVoice.innerHTML = '<option value="">Select a voice</option>';
+                receiverVoice.innerHTML = '<option value="">Select a voice</option>';
+                
+                // Add all voices to both dropdowns
                 voices.forEach(voice => {
-                    const nameLower = voice.name.toLowerCase();
-                    if (nameLower.includes('Adam')) voiceMap['male'] = voice.id;
-                    if (nameLower.includes('Natalie')) voiceMap['female'] = voice.id;
-                    if (nameLower.includes('Brian')) voiceMap['brian'] = voice.id;
-                    if (nameLower.includes('Laura')) voiceMap['laura'] = voice.id;
+                    // Add to sender dropdown
+                    const senderOption = document.createElement('option');
+                    senderOption.value = voice.voice_id;  // Use voice_id directly
+                    senderOption.textContent = voice.name;
+                    senderVoice.appendChild(senderOption);
+                    
+                    // Add to receiver dropdown
+                    const receiverOption = document.createElement('option');
+                    receiverOption.value = voice.voice_id;  // Use voice_id directly
+                    receiverOption.textContent = voice.name;
+                    receiverVoice.appendChild(receiverOption);
                 });
 
                 // Save to localStorage
                 localStorage.setItem('elevenLabsKey', apiKey);
-                localStorage.setItem('voiceMap', JSON.stringify(voiceMap));
                 
                 alert('Voice IDs successfully fetched!');
             } catch (error) {

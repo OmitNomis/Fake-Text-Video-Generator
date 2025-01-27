@@ -218,108 +218,46 @@ def generate_audio_eleven_labs(text, voice_id, api_key):
         print(f"Error response: {response.text}")
         raise Exception(f"ElevenLabs API error: {response.text}")
 
+# Update get_voice_ids function
 def get_voice_ids(api_key):
-    """Fetch and map voice IDs from ElevenLabs"""
-    try:
-        print("\nFetching voices from ElevenLabs...")
-        voice_map = {}
-        headers = {"xi-api-key": api_key}
+    """Fetch all available voices from ElevenLabs"""
+    print("\nFetching voices from ElevenLabs...")
+    headers = {"xi-api-key": api_key}
+    
+    response = requests.get(
+        "https://api.elevenlabs.io/v1/voices",
+        headers=headers
+    )
+    
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch voices: {response.text}")
         
-        # Initialize Adam's hardcoded voice ID
-        hardcoded_adam_id = 'pNInz6obpgDQGcFmaJgB'
-        
-        # Get regular voices
-        response = requests.get(
-            "https://api.elevenlabs.io/v1/voices",
-            headers=headers
-        )
-        
-        if response.status_code != 200:
-            raise Exception(f"Failed to fetch voices: {response.text}")
-            
-        voices = response.json()
-        
-        print("\nAvailable voices in ElevenLabs:")
-        for voice in voices["voices"]:
-            print(f"Name: {voice['name']}, ID: {voice['voice_id']}")
-            name_lower = voice['name'].lower()
-            
-            # Search for Adam's voice
-            if 'adam' in name_lower and 'legacy' in name_lower:
-                voice_map['adam'] = voice['voice_id']
-                print(f"Found Adam (Legacy) voice: {voice['name']}")
-            elif 'brian' in name_lower:
-                voice_map['brian'] = voice['voice_id']
-                print(f"Found Brian voice: {voice['name']}")
-            elif 'natalie' in name_lower:
-                voice_map['natalie'] = voice['voice_id']
-                print(f"Found Natalie voice: {voice['name']}")
-            elif 'laura' in name_lower:
-                voice_map['laura'] = voice['voice_id']
-                print(f"Found Laura voice: {voice['name']}")
-        
-        # If Adam's voice ID is not found, use the hardcoded ID
-        if 'adam' not in voice_map:
-            voice_map['adam'] = hardcoded_adam_id
-            print(f"Using hardcoded Adam (Legacy) voice ID: {hardcoded_adam_id}")
-        
-        print("\nFinal voice map:", voice_map)
-        
-        # Verify all required voices are found
-        missing_voices = []
-        required_voices = ['adam', 'brian', 'natalie', 'laura']
-        for voice in required_voices:
-            if voice not in voice_map:
-                missing_voices.append(voice)
-        
-        if missing_voices:
-            all_voices = "\nAll available voices:\n" + "\n".join([f"- {v['name']} ({v['voice_id']})" for v in voices["voices"]])
-            raise Exception(f"Missing required voices: {', '.join(missing_voices)}.{all_voices}")
-        
-        return voice_map
-        
-    except Exception as e:
-        print(f"Error fetching voice IDs: {str(e)}")
-        raise
+    voices = response.json()["voices"]
+    
+    if not voices:
+        raise ValueError("No voices found in your ElevenLabs account")
+    
+    return voices  # Return the raw voices array
 
+# Update generate_video function to use voice IDs directly
 def generate_video(messages, header_data):
     try:
-        # Get voice settings from header data
         voice_settings = header_data.get('voiceSettings', {})
         api_key = voice_settings.get('apiKey')
         
         if not api_key:
             raise ValueError("ElevenLabs API key is required")
-            
-        # Fetch voice IDs
-        voice_map = get_voice_ids(api_key)
         
-        if not voice_map:
-            raise ValueError("No voices found in your ElevenLabs account")
-        
-        # Map 'male'/'female' to specific voices
-        gender_to_voice = {
-            'male': 'adam',  # Map 'male' to 'adam'
-            'female': 'natalie'  # Map 'female' to 'natalie'
-        }
-            
-        # Get selected voice types and map them to specific voices
-        sender_type = voice_settings.get('sender', 'male').lower()
-        receiver_type = voice_settings.get('receiver', 'female').lower()
-        
-        # Convert gender to specific voice names
-        sender_voice = gender_to_voice.get(sender_type, sender_type)
-        receiver_voice = gender_to_voice.get(receiver_type, receiver_type)
-        
-        # Get corresponding voice IDs
-        sender_voice_id = voice_map.get(sender_voice)
-        receiver_voice_id = voice_map.get(receiver_voice)
+        # Get sender and receiver voice IDs directly from the request
+        sender_voice_id = voice_settings.get('sender')
+        receiver_voice_id = voice_settings.get('receiver')
         
         if not sender_voice_id or not receiver_voice_id:
-            raise ValueError(f"Could not find voice IDs for sender ({sender_type} -> {sender_voice}) or receiver ({receiver_type} -> {receiver_voice}). Available voices: {voice_map}")
+            raise ValueError("Sender and receiver voice IDs are required")
         
         print(f"Using voice IDs - Sender: {sender_voice_id}, Receiver: {receiver_voice_id}")
         
+        # Rest of the function remains the same
         # Get the selected background video
         selected_bg = header_data.get('backgroundVideo', 'background 3.mp4')
         print(f"Using background video: {selected_bg}")  # Debug log
@@ -493,19 +431,8 @@ def fetch_voices():
         if not api_key:
             return jsonify({'error': 'API key is required'}), 400
             
-        response = requests.get(
-            "https://api.elevenlabs.io/v1/voices",
-            headers={"xi-api-key": api_key}
-        )
-        
-        if response.status_code != 200:
-            return jsonify({'error': 'Failed to fetch voices'}), response.status_code
-            
-        voices = response.json()
-        voice_list = [{'name': voice['name'], 'id': voice['voice_id']} 
-                     for voice in voices['voices']]
-                     
-        return jsonify(voice_list)
+        voices = get_voice_ids(api_key)
+        return jsonify(voices)  # Return the complete voice data
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
