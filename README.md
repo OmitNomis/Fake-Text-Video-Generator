@@ -3,7 +3,7 @@
 ## Sample Video
 
 <video width="600" controls>
-  <source src="sample-video/output_video.mp4" type="video/mp4">
+  <source src="https://github.com/OmitNomis/Light-Version---Fake-Text-Story-Generator/sample-video/output_video.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
