@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fake Text Story Video Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/imessage.css') }}?v={{ range(1, 999999) | random }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}?v={{ range(1, 999999) | random }}" type="text/css">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -70,7 +71,10 @@
                         <button id="senderToggle">⇄</button>
                         <button id="addMessage">Send</button>
                     </div>
-                    <button class="generate-button" id="generateBtn">Generate Video</button>
+                    <div class="button-group">
+                        <button class="generate-button" id="generateBtn">Generate Video</button>
+                        <button class="import-button" id="importBtn">Import JSON</button>
+                    </div>
                 </div>
             </div>
             
@@ -150,6 +154,35 @@
         </div>
     </div>
 
+    <!-- Add modal for JSON import -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Import Conversation</h2>
+            <div class="sample-json">
+                Sample Format:
+                <pre>
+                    [
+                        {
+                            "id": 1234567890,
+                            "text": "Hey, how are you?",
+                            "is_sender": true,
+                            "soundEffect": "notification"
+                        },
+                        {
+                            "id": 1234567891,
+                            "text": "I'm good, thanks!",
+                            "is_sender": false,
+                            "soundEffect": null
+                        }
+                    ]
+                </pre>
+            </div>
+            <textarea id="jsonInput" spellcheck="false" placeholder="Paste your JSON data here"></textarea>
+            <button id="confirmImport">Import Conversation</button>
+        </div>
+    </div>
+
     <script>
         let messages = [];
         let isSender = true;
@@ -177,6 +210,37 @@
             })).filter(msg => msg.text);
             
             console.log('Updated messages array:', messages);
+        }
+
+        function importFromJSON(json){
+            if (!json) return;
+            
+            try {
+                const data = JSON.parse(json);
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid JSON data');
+                }
+                
+                // Clear existing messages
+                const dynamicContainer = document.querySelector('.dynamic-container');
+                dynamicContainer.innerHTML = '';
+                
+                // Add new messages
+                data.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${msg.is_sender ? 'sender' : 'receiver'}`;
+                    messageDiv.textContent = msg.text;
+                    messageDiv.setAttribute('data-id', msg.id);
+                    messageDiv.setAttribute('data-sound-effect', msg.soundEffect || '');
+                    dynamicContainer.appendChild(messageDiv);
+                });
+                
+                updateMessagesArray();  // Update messages array after importing
+                scrollToBottom();
+            } catch (error) {
+                console.error('Error importing JSON:', error);
+                alert('Failed to import JSON data. Please check the format.');
+            }
         }
 
         // Modify addMessage function
@@ -610,6 +674,55 @@
                 voiceMap = JSON.parse(savedVoiceMap);
             }
         });
+
+        const importBtn = document.getElementById('importBtn');
+        const importModal = document.getElementById('importModal');
+        const closeBtn = document.querySelector('.close');
+        const confirmImport = document.getElementById('confirmImport');
+        const jsonInput = document.getElementById('jsonInput');
+
+        importBtn.onclick = () => {
+            importModal.style.display = "block";
+        }
+
+        closeBtn.onclick = () => {
+            importModal.style.display = "none";
+        }
+
+        window.onclick = (event) => {
+            if (event.target == importModal) {
+                importModal.style.display = "none";
+            }
+        }
+
+        confirmImport.onclick = () => {
+            const jsonData = jsonInput.value;
+            if (!jsonData.trim()) {
+                alert('Please enter JSON data');
+                return;
+            }
+
+            try {
+                JSON.parse(jsonData); // Validate JSON
+                importFromJSON(jsonData);
+                importModal.style.display = "none";
+                jsonInput.value = '';
+            } catch (error) {
+                alert('Invalid JSON format');
+            }
+        }
+
+        // Update the textarea to use monospace font and format pasted JSON
+        jsonInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const paste = e.clipboardData.getData('text');
+            try {
+                const json = JSON.parse(paste);
+                jsonInput.value = JSON.stringify(json, null, 4);
+            } catch (error) {
+                jsonInput.value = paste;
+            }
+        });
     </script>
 </body>
-</html> 
+</html>
