@@ -4,3 +4,10 @@ __pycache__/
 venv/
 .DS_Store
 
+# Ignore everything in profile_pictures directory
+static/images/profile_pictures/*
+
+# But not these files (defaults)
+!static/images/profile_pictures/profile.jpg
+!static/images/profile_pictures/blank_profile.webp
+
