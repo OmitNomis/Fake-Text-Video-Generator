@@ -1,10 +1,12 @@
 import logging
 import sys
+import uuid
+from datetime import datetime
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, send_file, render_template, send_from_directory
 from flask_cors import CORS
 from moviepy import VideoFileClip, ImageClip, CompositeVideoClip, concatenate_videoclips, CompositeAudioClip
 from moviepy.audio.io.AudioFileClip import AudioFileClip
@@ -46,10 +48,15 @@ SOUND_EFFECTS = {
     'rizz': os.path.join('static', 'sfx', 'rizz.mp3'),
     'send': os.path.join('static', 'sfx', 'send.mp3'),
     'receive': os.path.join('static', 'sfx', 'receive.mp3'),
+    'bleh': os.path.join('static', 'sfx', 'bleh.mp3'),
 }
 
 PROFILE_PICTURES_DIR = os.path.join('static', 'images', 'profile_pictures')
 os.makedirs(PROFILE_PICTURES_DIR, exist_ok=True)
+
+# Add this near the top with other constants
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'output')
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 @app.route('/')
 def index():
@@ -407,7 +414,12 @@ def generate_video(messages, header_data):
         if audio_clips:
             final = final.with_audio(CompositeAudioClip(audio_clips))
 
-        output_path = "output_video.mp4"
+        # Generate unique filename with timestamp and UUID
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_id = str(uuid.uuid4())[:8]
+        output_filename = f'video_{timestamp}_{unique_id}.mp4'
+        output_path = os.path.join(OUTPUT_DIR, output_filename)
+
         final.write_videofile(output_path, 
                             fps=30, 
                             codec='libx264',
@@ -417,7 +429,7 @@ def generate_video(messages, header_data):
                             threads=4,
                             audio_bitrate="192k")
         
-        return output_path
+        return output_filename
         
     except Exception as e:
         print(f"Error generating video: {str(e)}")
@@ -458,11 +470,19 @@ def generate_endpoint():
             'backgroundVideo': data.get('backgroundVideo')  # Make sure this is passed from the frontend
         }
         
-        video_path = generate_video(messages, header_data)
-        return send_file(video_path, as_attachment=True)
+        video_filename = generate_video(messages, header_data)
+        return jsonify({
+            'success': True,
+            'video_url': f'/output/{video_filename}'
+        })
     except Exception as e:
         print(f"Error in generate endpoint: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+# Add new route to serve video files
+@app.route('/output/<filename>')
+def serve_video(filename):
+    return send_from_directory(OUTPUT_DIR, filename)
 
 @app.route('/api/fetch-voices', methods=['POST'])
 def fetch_voices():

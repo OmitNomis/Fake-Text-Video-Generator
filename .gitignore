@@ -16,3 +16,5 @@ static/videos/*
 
 # Leave a sample file
 !static/videos/background 3.mp4
+
+output/*
