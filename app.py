@@ -33,7 +33,9 @@ VOICE_SETTINGS = {
 SOUND_EFFECTS = {
     'vineboom': os.path.join('static', 'sfx', 'vineboom.mp3'),
     'notification': os.path.join('static', 'sfx', 'notification.mp3'),
-    'rizz': os.path.join('static', 'sfx', 'rizz.mp3')
+    'rizz': os.path.join('static', 'sfx', 'rizz.mp3'),
+    'send': os.path.join('static', 'sfx', 'send.mp3'),
+    'receive': os.path.join('static', 'sfx', 'receive.mp3'),
 }
 
 @app.route('/')

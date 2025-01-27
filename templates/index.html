@@ -188,6 +188,18 @@
             messageDiv.className = `message ${isSender ? 'sender' : 'receiver'}`;
             messageDiv.textContent = text;
             messageDiv.setAttribute('data-id', Date.now());
+
+            // find out if it is the first message
+            const isFirstMessage = messageContainer.querySelector('.dynamic-container').children.length === 0;
+            if (isSender){
+                messageDiv.setAttribute('data-sound-effect', 'send');
+            } else {
+                if (isFirstMessage){
+                    messageDiv.setAttribute('data-sound-effect', 'notification');
+                } else {
+                    messageDiv.setAttribute('data-sound-effect', 'receive');
+                }
+            }
             
             const dynamicContainer = document.querySelector('.dynamic-container');
             dynamicContainer.appendChild(messageDiv);
@@ -340,6 +352,13 @@
                 const isSenderMessage = messageDiv.classList.contains('sender');
                 messageDiv.classList.toggle('sender');
                 messageDiv.classList.toggle('receiver');
+
+                const isFirstMessage = messageDiv.parentNode.querySelector('.message') === messageDiv;
+                if (isSenderMessage){
+                    messageDiv.setAttribute('data-sound-effect', isFirstMessage ? 'notification' : 'receive');
+                } else {
+                    messageDiv.setAttribute('data-sound-effect', 'send');
+                }
                 
                 const index = Array.from(messageDiv.parentNode.children).indexOf(messageDiv);
                 if (index !== -1 && messages[index]) {
@@ -536,6 +555,12 @@
                 </button>
                 <button class="effect-option" data-effect="rizz">
                     Rizz ${currentEffect === 'rizz' ? '✓' : ''}
+                </button>
+                <button class="effect-option" data-effect="send">
+                    Send ${currentEffect === 'send' ? '✓' : ''}
+                </button>
+                <button class="effect-option" data-effect="receive">
+                    Receive ${currentEffect === 'receive' ? '✓' : ''}
                 </button>
             `;
             return submenu;
