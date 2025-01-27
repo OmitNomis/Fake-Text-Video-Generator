@@ -2,10 +2,8 @@
 
 ## Sample Video
 
-<video width="600" controls>
-  <source src="https://github.com/OmitNomis/Light-Version---Fake-Text-Story-Generator/sample-video/output_video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+<video src='[https://raw.github.com/OmitNomis/Light-Version---Fake-Text-Story-Generator.git](https://github.com/OmitNomis/Light-Version---Fake-Text-Story-Generator/blob/main/sample-video/output_video%20.mp4)' width=180/>
+
 
 Welcome to the Fake Text Story Video Generator! This application allows you to create engaging text message videos with realistic conversations.
 
