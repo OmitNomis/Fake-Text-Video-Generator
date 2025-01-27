@@ -17,6 +17,7 @@ from PIL import Image, ImageFilter, ImageDraw
 import io
 import numpy as np
 import requests
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)
@@ -35,6 +36,9 @@ SOUND_EFFECTS = {
     'notification': os.path.join('static', 'sfx', 'notification.mp3'),
     'rizz': os.path.join('static', 'sfx', 'rizz.mp3')
 }
+
+PROFILE_PICTURES_DIR = os.path.join('static', 'images', 'profile_pictures')
+os.makedirs(PROFILE_PICTURES_DIR, exist_ok=True)
 
 @app.route('/')
 def index():
@@ -473,6 +477,30 @@ def fetch_voices():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/upload-profile-picture', methods=['POST'])
+def upload_profile_picture():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
+    
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    if file:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(PROFILE_PICTURES_DIR, filename)
+        file.save(filepath)
+        return jsonify({
+            'image_path': f'/static/images/profile_pictures/{filename}'
+        })
+
+@app.route('/api/profile-pictures')
+def get_profile_pictures():
+    files = [f for f in os.listdir(PROFILE_PICTURES_DIR) 
+             if os.path.isfile(os.path.join(PROFILE_PICTURES_DIR, f)) 
+             and f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp'))]
+    return jsonify(files)
+
 if __name__ == '__main__':
     # Run Flask on all interfaces
-    app.run(debug=True, host='0.0.0.0', port=5001) 
+    app.run(debug=True, host='0.0.0.0', port=5001)

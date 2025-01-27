@@ -10,6 +10,30 @@
     <meta http-equiv="Expires" content="0">
 </head>
 <body>
+    <div id="imageModal" class="modal picture-modal">
+        <div class="modal-content picture-modal-content">
+            <span class="close picture-modal-close">&times;</span>
+            <h2>Choose Profile Picture</h2>
+            <div class="profile-sections">
+                <div class="upload-section">
+                    <h3>Upload New Image</h3>
+                    <div class="upload-preview-container">
+                        <img id="uploadPreview" src="#" alt="Preview" style="display: none;">
+                        <div class="upload-controls">
+                            <input type="file" id="profileUpload" accept="image/*,.webp" multiple="false">
+                            <button id="uploadBtn" disabled>Upload</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="existing-section">
+                    <h3>Existing Images</h3>
+                    <div id="existingImages" class="image-grid">
+                        <!-- Existing images will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="stars">
         <div class="star"></div>
         <div class="star"></div>
@@ -474,31 +498,127 @@
         const profileUpload = document.getElementById('profileUpload');
         const profileImage = document.getElementById('profileImage');
         const headerName = document.getElementById('headerName');
+        const modal = document.getElementById('imageModal');
+        const closeBtn = document.querySelector('.close');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const existingImages = document.getElementById('existingImages');
+        const uploadPreview = document.getElementById('uploadPreview');
 
         // Clear any existing storage and set defaults on page load
         window.addEventListener('load', () => {
             localStorage.clear();  // Clear all stored values
-            profileImage.src = "{{ url_for('static', filename='images/profile.jpg') }}";
+            // Set default profile picture
+            profileImage.src = "/static/images/profile_pictures/profile.jpg";
             headerName.textContent = 'John Doe';
             // Set initial defaults in storage
             localStorage.setItem('profileImage', profileImage.src);
             localStorage.setItem('headerName', 'John Doe');
+            // Load existing images initially
+            loadExistingImages();
         });
 
-        // Handle profile image upload
-        profileImageContainer.addEventListener('click', () => {
-            profileUpload.click();
-        });
-
+        // Handle profile image upload preview
         profileUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    profileImage.src = e.target.result;
-                    localStorage.setItem('profileImage', e.target.result);  // Save current change
+                    uploadPreview.src = e.target.result;
+                    uploadPreview.style.display = 'block';
+                    uploadBtn.disabled = false;
                 };
                 reader.readAsDataURL(file);
+            } else {
+                uploadPreview.style.display = 'none';
+                uploadBtn.disabled = true;
+            }
+        });
+
+        // Open modal and load images
+        profileImageContainer.addEventListener('click', () => {
+            modal.style.display = "block";
+            loadExistingImages();
+            // Reset upload preview
+            uploadPreview.style.display = 'none';
+            uploadBtn.disabled = true;
+            profileUpload.value = '';
+        });
+
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = "none";
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        // Load existing images
+        async function loadExistingImages() {
+            try {
+                const response = await fetch('/api/profile-pictures');
+                const images = await response.json();
+                
+                existingImages.innerHTML = images.map(image => `
+                    <div class="image-item">
+                        <img src="/static/images/profile_pictures/${image}" 
+                             onclick="selectProfileImage('/static/images/profile_pictures/${image}')"
+                             class="${profileImage.src.includes(image) ? 'selected' : ''}">
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading existing images:', error);
+            }
+        }
+
+        // Select existing image
+        function selectProfileImage(src) {
+            profileImage.src = src;
+            localStorage.setItem('profileImage', src);
+            
+            // Update selected state in grid
+            document.querySelectorAll('.image-grid img').forEach(img => {
+                img.classList.toggle('selected', img.src === src);
+            });
+            
+            modal.style.display = "none";
+        }
+
+        // Handle new image upload
+        uploadBtn.addEventListener('click', async () => {
+            const file = profileUpload.files[0];
+            if (!file) {
+                alert('Please select a file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/upload-profile-picture', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                const data = await response.json();
+                profileImage.src = data.image_path;
+                localStorage.setItem('profileImage', data.image_path);
+                
+                // Reset upload preview
+                uploadPreview.style.display = 'none';
+                uploadBtn.disabled = true;
+                profileUpload.value = '';
+                
+                // Refresh existing images
+                await loadExistingImages();
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('Failed to upload image');
             }
         });
 
@@ -612,4 +732,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
