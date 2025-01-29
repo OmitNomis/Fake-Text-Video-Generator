@@ -11,7 +11,7 @@ def capture_chat_interface(messages, show_header=True, header_data=None):
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--hide-scrollbars')
-    chrome_options.add_argument('--force-device-scale-factor=1')
+    chrome_options.add_argument('--force-device-scale-factor=2')  # Increase scale factor for better rendering
     chrome_options.add_argument('--window-size=414,900')
     chrome_options.add_argument('--no-sandbox')  # Add this line
     chrome_options.add_argument('--disable-dev-shm-usage')  # Add this line

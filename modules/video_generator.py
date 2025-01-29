@@ -89,7 +89,7 @@ def generate_video(messages, header_data):
                 target_width = int(background.w * 0.85)
                 width_scale = target_width / current_image.width
                 new_height = int(current_image.height * width_scale)
-                current_image = current_image.resize((target_width, new_height), Image.LANCZOS)
+                current_image = current_image.resize((target_width, new_height), Image.Resampling.LANCZOS)
                 current_array = np.array(current_image)
 
                 x_center = background.w // 2 - target_width // 2
@@ -132,10 +132,16 @@ def generate_video(messages, header_data):
                             fps=30, 
                             codec='libx264',
                             audio_codec='aac',
-                            bitrate="8000k",
-                            preset='slower',
+                            bitrate="12000k",  # Increased from 8000k
+                            preset='veryslow',  # Changed from 'slower' for better quality
                             threads=4,
-                            audio_bitrate="192k")
+                            audio_bitrate="320k",  # Increased from 192k
+                            ffmpeg_params=[
+                                "-crf", "18",  # Lower CRF value for better quality (default is 23)
+                                "-profile:v", "high",
+                                "-level", "4.2",
+                                "-pix_fmt", "yuv420p"
+                            ])
         
         # Clean up temporary files
         for temp_file in temp_files:
