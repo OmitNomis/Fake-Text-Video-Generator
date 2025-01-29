@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fake Text Story Video Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v={{ range(1, 999999) | random }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/imessage.css') }}?v={{ range(1, 999999) | random }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}?v={{ range(1, 999999) | random }}" type="text/css">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -11,6 +12,7 @@
     <meta http-equiv="Expires" content="0">
 </head>
 <body>
+    <!-- Loading overlay -->
     <div id="loadingOverlay" class="loading-overlay" style="display: none;">
         <div class="loading-content">
             <div class="loader"></div>
@@ -24,6 +26,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Profile image modal -->
     <div id="profileImageModal" class="modal picture-modal">
         <div class="modal-content picture-modal-content">
             <span class="close picture-modal-close">&times;</span>
@@ -48,140 +52,117 @@
             </div>
         </div>
     </div>
-    <div class="stars">
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-    </div>
+
     <div class="page-container">
-        <!-- Guide Section -->
-        <div class="guide-section">
-            <h1>Fake Text Story Video Generator</h1>
-            <p>Welcome to GoViral Wizard's Text Story Generator! Create engaging text message videos with realistic conversations.</p>
-            
-            <p>With our generator, you can:</p>
-            <ul>
-                <li>Create messages for both sender and receiver</li>
-                <li>Edit messages freely at any time</li>
-                <li>Add fun sound effects to individual messages</li>
-                <li>Choose from various voice actors for both participants</li>
-                <li>Select your preferred background video style</li>
-            </ul>
-            
-            <p><strong>Important:</strong> To use voice features, you'll need an ElevenLabs account. Enter your API key and ensure you have the "Adam" and "Natalie" voices added to your voice library.</p>
-            
-            <p>Ready to create your viral text story? Start typing your messages and let your creativity flow!</p>
-        </div>
-
-        <!-- Chat Section -->
-        <div class="chat-section">
-            <div class="container" id="chatContainer">
-                <div class="header">
-                    <div class="header-left">
-                        <div class="back-button">‹</div>
-                    </div>
-                    <div class="header-center">
-                        <div class="profile-image" id="profileImageContainer">
-                            <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Profile" id="profileImage">
-                            <input type="file" id="profileUpload" accept="image/*" style="display: none;">
+        <h1>Fake Text Story Video Generator</h1>
+        
+        <!-- iMessage UI Section -->
+        <div class="content-section">
+            <!-- Main Chat UI -->
+            <div class="chat-section">
+                <div class="container" id="chatContainer">
+                    <div class="header">
+                        <div class="header-left">
+                            <div class="back-button">‹</div>
                         </div>
-                        <div class="header-text" id="headerName" contenteditable="true" spellcheck="false">
-                            John Doe
+                        <div class="header-center">
+                            <div class="profile-image" id="profileImageContainer">
+                                <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Profile" id="profileImage">
+                                <input type="file" id="profileUpload" accept="image/*" style="display: none;">
+                            </div>
+                            <div class="header-text" id="headerName" contenteditable="true" spellcheck="false">
+                                John Doe
+                            </div>
+                        </div>
+                        <div class="header-right">
                         </div>
                     </div>
-                    <div class="header-right">
-                    </div>
-                </div>
-                <div class="message-container" id="messageContainer">
-                    <div class="dynamic-container">
-                        <!-- Messages will be added here -->
-                    </div>
-                </div>
-                <div class="input-area">
-                    <div class="imessage-input">
-                        <input type="text" id="messageInput" placeholder="iMessage">
-                        <button id="senderToggle">⇄</button>
-                        <button id="addMessage">Send</button>
-                    </div>
-                    <div class="button-group">
-                        <button class="generate-button" id="generateBtn">Generate Video</button>
-                        <button class="import-button" id="importBtn">Import JSON</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Settings wrapper -->
-            <div class="settings-wrapper">
-                <div class="voice-settings">
-                    <h3>Choose Voice Actors</h3>
-                    <div class="api-key-section">
-                        <input type="text" id="elevenLabsKey" placeholder="Enter ElevenLabs API Key" class="api-key-input">
-                        <button onclick="fetchVoiceIds()" class="fetch-voices-btn">Fetch Voices</button>
-                    </div>
-                    <div class="voice-selector-container">
-                        <div class="voice-selector">
-                            <label for="senderVoice">Sender Voice:</label>
-                            <select id="senderVoice">
-                                <option value="">Select a voice</option>
-                            </select>
-                        </div>
-                        <div class="voice-selector">
-                            <label for="receiverVoice">Receiver Voice:</label>
-                            <select id="receiverVoice">
-                                <option value="">Select a voice</option>
-                            </select>
+                    <div class="message-container" id="messageContainer">
+                        <div class="dynamic-container">
+                            <!-- Messages will be added here -->
                         </div>
                     </div>
-                </div>
-                <div class="video-selection">
-                    <h3>Select Background Video</h3>
-                    <div class="video-previews" id="videoPreviewsContainer">
-                        <!-- Videos will be dynamically added here -->
+                    <div class="input-area">
+                        <div class="imessage-input">
+                            <input type="text" id="messageInput" placeholder="iMessage">
+                            <button id="senderToggle">⇄</button>
+                            <button id="addMessage">Send</button>
+                        </div>
+                        <div class="button-group">
+                            <button class="generate-button" id="generateBtn">Generate Video</button>
+                            <button class="import-button" id="importBtn">Import JSON</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Add this after the chat-section div -->
-        <div class="steps-guide">
-            <h2>How to Use</h2>
-            <div class="step">
-                <div class="step-number">1</div>
-                <p>Type your message in the input box and press Enter or click Send</p>
-            </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <p>Click on any message to edit, add sound effects, or manage message options</p>
-            </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <p>Click on profile image to upload your own profile image. Click on header name to edit your name.</p>
-            </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <p>Enter your ElevenLabs API key and click "Fetch Voices" to set up voice actors</p>
-            </div>
-            <div class="step">
-                <div class="step-number">5</div>
-                <p>Select voice actors for both sender and receiver</p>
-            </div>
-            <div class="step">
-                <div class="step-number">6</div>
-                <p>Choose your preferred background video style</p>
-            </div>
-            <div class="step">
-                <div class="step-number">7</div>
-                <p>Click "Generate Video" to create your text message video</p>
-            </div>
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <section class="voice-settings">
+                <h3>Voice Settings</h3>
+                <input type="text" class="api-key-input" id="elevenLabsKey" placeholder="Enter ElevenLabs API Key">
+                <button class="button button-primary" onclick="fetchVoiceIds()">Fetch Voices</button>
+                
+                <div class="voice-selector">
+                    <label for="senderVoice">Sender Voice</label>
+                    <select id="senderVoice">
+                        <option value="">Select a voice</option>
+                    </select>
+                </div>
+                
+                <div class="voice-selector">
+                    <label for="receiverVoice">Receiver Voice</label>
+                    <select id="receiverVoice">
+                        <option value="">Select a voice</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="video-selection">
+                <h3>Background Video</h3>
+                <div class="video-grid" id="videoPreviewsContainer">
+                    <!-- Videos will be dynamically added here -->
+                </div>
+            </section>
+
+            <section class="tutorial-section">
+                <h3>How to Use</h3>
+                <div class="tutorial-grid">
+                    <div class="tutorial-item">
+                        <h3>1. Create Messages</h3>
+                        <p>Type your message and use the toggle button to switch between sender and receiver.</p>
+                    </div>
+                    <div class="tutorial-item">
+                        <h3>2. Customize Profile</h3>
+                        <p>Click the profile picture to change it and edit the name by clicking on it.</p>
+                    </div>
+                    <div class="tutorial-item">
+                        <h3>3. Add Voice</h3>
+                        <p>Enter your ElevenLabs API key and select voices for both participants.</p>
+                    </div>
+                    <div class="tutorial-item">
+                        <h3>4. Choose Background</h3>
+                        <p>Select a background video style for your story from the options below.</p>
+                    </div>
+                    <div class="tutorial-item">
+                        <h3>5. Import JSON (Optional)</h3>
+                        <p>Click "Import JSON" to load an entire conversation from a JSON file.</p>
+                    </div>
+                    <div class="tutorial-item">
+                        <h3>6. Generate Video</h3>
+                        <p>Click the Generate Video button to create your story video.</p>
+                    </div>
+                    <div class="tutorial-item">
+                        <h3>Pro Tips</h3>
+                        <p>Click on any message to edit, add sound effects, or manage message options.</p>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
-    <!-- Add modal for JSON import -->
+    <!-- Import JSON Modal -->
     <div id="importJsonModal" class="modal json-import-modal">
         <div class="modal-content json-import-modal-content">
             <span class="close json-import-modal-close">&times;</span>
@@ -1038,15 +1019,20 @@
                 
                 const container = document.getElementById('videoPreviewsContainer');
                 container.innerHTML = videos.map((video, index) => `
-                    <div class="video-option">
-                        <video src="/static/videos/${video}" loop muted class="preview-video"></video>
+                    <label class="video-option">
                         <input type="radio" name="background" value="${video}" ${index === 0 ? 'checked' : ''}>
+                        <video src="/static/videos/${video}" loop muted class="preview-video"></video>
                         <label>${video.replace(/\.[^/.]+$/, "")}</label>
-                    </div>
+                    </label>
                 `).join('');
 
                 // Reattach event listeners for video previews
                 document.querySelectorAll('.preview-video').forEach(video => {
+                    video.parentElement.addEventListener('click', () => {
+                        const input = video.parentElement.querySelector('input[type="radio"]');
+                        input.checked = true;
+                    });
+                    
                     video.addEventListener('mouseover', function() {
                         this.play();
                     });
@@ -1083,5 +1069,11 @@
             entry.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
+
+    <!-- Updated footer -->
+    <footer class="footer">
+        <p>Made with <span class="heart">♥</span> by <a href="https://github.com/OmitNomis" target="_blank">OmitNomis</a></p>
+    </footer>
+
 </body>
 </html>
