@@ -376,7 +376,7 @@
             const dynamicContainer = document.querySelector('.dynamic-container');
             dynamicContainer.appendChild(messageDiv);
 
-            updateMessagesArray(); // Update messages array after adding
+            updateMessagesArray(); 
             
             messageInput.value = '';
             messageInput.focus();
@@ -449,14 +449,6 @@
                 const data = await response.json();
                 updateProgress(100);
                 addLog('Video generated successfully!', 'success');
-                
-                // Create download link
-                const a = document.createElement('a');
-                a.href = data.video_url;
-                a.download = data.video_url.split('/').pop();
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
                 
             } catch (error) {
                 console.error('Error:', error);
@@ -681,7 +673,6 @@
             }
         });
 
-        // Add click listener to message container
         messageContainer.addEventListener('click', handleMessageClick);
 
         // Profile image and name editing
@@ -694,8 +685,6 @@
         const existingImages = document.getElementById('existingImages');
         const uploadPreview = document.getElementById('uploadPreview');
 
-        // Remove the existing window.addEventListener('load') that clears localStorage
-        // and replace with this new initialization code
         window.addEventListener('load', () => {
             // Load saved settings or set defaults
             const savedHeaderName = localStorage.getItem('headerName') || 'John Doe';
@@ -1049,7 +1038,6 @@
 
         // Call this function when the page loads
         window.addEventListener('load', () => {
-            // ...existing load event code...
             loadBackgroundVideos();
         });
 
