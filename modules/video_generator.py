@@ -65,7 +65,7 @@ def generate_video(messages, header_data):
                 voice_id = sender_voice_id if msg['is_sender'] else receiver_voice_id
                 audio_path = generate_audio_eleven_labs(msg['text'], voice_id, api_key)
                 temp_files.append(audio_path)  # Track temporary audio file
-                voice_audio = AudioFileClip(audio_path)
+                voice_audio = voice_audio = AudioFileClip(audio_path).with_volume_scaled(2.5)
                 
                 if msg.get('soundEffect') and msg['soundEffect'] in SOUND_EFFECTS:
                     effect_audio = AudioFileClip(SOUND_EFFECTS[msg['soundEffect']])
