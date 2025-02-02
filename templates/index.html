@@ -337,9 +337,18 @@
                 data.forEach(msg => {
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `message ${msg.is_sender ? 'sender' : 'receiver'}`;
-                    messageDiv.textContent = msg.text;
+
+                    // Remove all '*' characters from the text
+                    // This ensures that any asterisks used for formatting (e.g., **bold**) are removed
+                    const cleanedText = msg.text.replace(/\*/g, '');
+
+                    // Set the cleaned text as the content of the messageDiv
+                    messageDiv.textContent = cleanedText;
+
+                    // Add additional attributes
                     messageDiv.setAttribute('data-id', msg.id);
                     messageDiv.setAttribute('data-sound-effect', msg.soundEffect || '');
+                    // Append the messageDiv to the dynamic container
                     dynamicContainer.appendChild(messageDiv);
                 });
                 
