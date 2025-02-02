@@ -246,3 +246,110 @@ body {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
 }
+
+/* Updated tab and music selection styles */
+.background-selection {
+    margin-top: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 24px;
+    margin-top: 24px;
+}
+
+.background-selection h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 15px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    color: #666;
+}
+
+.tab-button:hover {
+    color: #007AFF;
+}
+
+.tab-button.active {
+    color: #007AFF;
+    border-bottom-color: #007AFF;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.music-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.music-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 8px;
+}
+
+.music-option:hover {
+    background-color: #e6e9ed;
+}
+
+.music-option input[type="radio"] {
+    display: none;
+    margin-right: 10px;
+}
+
+.music-option input[type="radio"]:checked + .music-name {
+    font-weight: 600;
+    color: #007AFF;
+}
+
+.music-name {
+    flex-grow: 1;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.play-pause-btn {
+    background-color: #007AFF;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.play-pause-btn:hover {
+    background-color: #0056b3;
+}

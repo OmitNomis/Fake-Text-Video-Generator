@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from modules.audio_generator import get_voice_ids
 from modules.video_generator import generate_video
-from modules.file_handlers import upload_profile_picture, get_profile_pictures, get_background_videos
+from modules.file_handlers import upload_profile_picture, get_profile_pictures, get_background_videos, get_background_music
 from config import OUTPUT_DIR
 
 app = Flask(__name__)
@@ -47,7 +47,8 @@ def generate_endpoint():
             'profileImage': data.get('profileImage', ''),
             'headerName': data.get('headerName', 'John Doe'),
             'voiceSettings': voice_settings,
-            'backgroundVideo': data.get('backgroundVideo')
+            'backgroundVideo': data.get('backgroundVideo'),
+            'backgroundMusic': data.get('backgroundMusic', 'none')  # Add this line
         }
         
         video_filename = generate_video(messages, header_data)
@@ -100,6 +101,10 @@ def get_profile_pictures_endpoint():
 @app.route('/api/background-videos')
 def get_background_videos_endpoint():
     return jsonify(get_background_videos())
+
+@app.route('/api/background-music')
+def get_background_music_endpoint():
+    return jsonify(get_background_music())
 
 if __name__ == '__main__':
     try:

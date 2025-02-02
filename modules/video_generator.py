@@ -1,5 +1,4 @@
-from moviepy import VideoFileClip, ImageClip, CompositeVideoClip, concatenate_videoclips, CompositeAudioClip
-from moviepy.audio.io.AudioFileClip import AudioFileClip
+from moviepy import VideoFileClip, ImageClip, CompositeVideoClip, concatenate_videoclips, CompositeAudioClip, AudioFileClip
 from PIL import Image
 import numpy as np
 import os
@@ -65,7 +64,7 @@ def generate_video(messages, header_data):
                 voice_id = sender_voice_id if msg['is_sender'] else receiver_voice_id
                 audio_path = generate_audio_eleven_labs(msg['text'], voice_id, api_key)
                 temp_files.append(audio_path)  # Track temporary audio file
-                voice_audio = voice_audio = AudioFileClip(audio_path).with_volume_scaled(2.5)
+                voice_audio = voice_audio = AudioFileClip(audio_path).with_volume_scaled(2.0)
                 
                 if msg.get('soundEffect') and msg['soundEffect'] in SOUND_EFFECTS:
                     effect_audio = AudioFileClip(SOUND_EFFECTS[msg['soundEffect']])
@@ -122,6 +121,28 @@ def generate_video(messages, header_data):
 
         if audio_clips:
             final = final.with_audio(CompositeAudioClip(audio_clips))
+
+        # Add background music if specified
+        background_music = header_data.get('backgroundMusic')
+        if background_music and background_music != 'none':
+            music_path = os.path.join(os.path.dirname(__file__), '..', 'static', 'music', background_music)
+            if os.path.exists(music_path):
+                background_audio = AudioFileClip(music_path).with_volume_scaled(0.2)
+                # Loop or truncate the background music to match the video's duration
+                if background_audio.duration < final.duration:
+                    background_audio = background_audio.audio_loop(duration=final.duration)
+                else:
+                    background_audio = background_audio.subclipped(0, final.duration)
+                
+                # Adjust volume levels
+                if final.audio:
+                    original_audio = final.audio
+                    final_audio = CompositeAudioClip([original_audio, background_audio])
+                else:
+                    final_audio = background_audio
+                
+                # Set the combined audio to the final video
+                final.audio = final_audio
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         unique_id = str(uuid.uuid4())[:8]
