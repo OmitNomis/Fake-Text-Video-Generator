@@ -1,37 +1,15 @@
 import logging
 import sys
-import uuid
-from datetime import datetime
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-from flask import Flask, request, jsonify, send_file, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
-from moviepy import VideoFileClip, ImageClip, CompositeVideoClip, concatenate_videoclips, CompositeAudioClip
-from moviepy.audio.io.AudioFileClip import AudioFileClip
-from gtts import gTTS
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-import tempfile
-import time
-import os
-from PIL import Image, ImageFilter, ImageDraw
-import io
-import numpy as np
-import requests
-from werkzeug.utils import secure_filename
-
-from modules.chat_interface import capture_chat_interface
-from modules.audio_generator import generate_audio_eleven_labs, get_voice_ids
+from modules.audio_generator import get_voice_ids
 from modules.video_generator import generate_video
 from modules.file_handlers import upload_profile_picture, get_profile_pictures, get_background_videos
-from config import VOICE_SETTINGS, SOUND_EFFECTS, PROFILE_PICTURES_DIR, OUTPUT_DIR
+from config import OUTPUT_DIR
 
 app = Flask(__name__)
 CORS(app)
