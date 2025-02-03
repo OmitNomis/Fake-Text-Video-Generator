@@ -172,11 +172,8 @@
           <div class="tab-content" id="music-tab">
             <div class="music-grid" id="musicPreviewsContainer">
               <label class="music-option">
-                <input
-                  type="radio"
-                  name="background-music"
-                  value="none"
-                  checked />
+                <input type="radio" name="background-music" value="none"
+                checked" />
                 <span class="music-name">None</span>
               </label>
               <!-- Music options will be dynamically added here -->
@@ -1072,6 +1069,7 @@
           });
 
           if (!response.ok) {
+            console.log(response);
             throw new Error("Failed to fetch voices");
           }
 
@@ -1237,7 +1235,7 @@
           const noneOption = document.createElement("label");
           noneOption.className = "music-option";
           noneOption.innerHTML = `
-            <input type="radio" name="background-music" value="none">
+            <input type="radio" name="background-music" value="none" checked>
             <span class="music-name">None</span>
         `;
           fragment.appendChild(noneOption);
@@ -1317,12 +1315,6 @@
             .getElementById(`${button.dataset.tab}-tab`)
             .classList.add("active");
         });
-      });
-
-      // Call this function when the page loads
-      window.addEventListener("load", () => {
-        loadBackgroundVideos();
-        loadBackgroundMusic();
       });
 
       function updateProgress(percent) {
